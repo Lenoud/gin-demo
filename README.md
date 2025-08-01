@@ -13,4 +13,6 @@ gin-demo/
 │── model/         # 数据模型
 │── middleware/    # 中间件
 │── utils/         # 工具函数
+│── static/        # 静态文件存放目录
+│── templates/        # html文件存放目录
 ```
