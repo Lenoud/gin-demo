@@ -19,7 +19,4 @@ func main(){
 	router.Load(g)
 	
 	g.Run(viper.GetString("server.port"))
-
-
-
 }
