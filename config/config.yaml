@@ -7,3 +7,4 @@ database:
   user: gin
   password: 123456
   db: gin_web
+

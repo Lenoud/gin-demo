@@ -3,11 +3,11 @@ package model
 import "errors"
 
 type StudentInfo struct {
-	Id         uint64 `gorm:"column:id;primary_key;auto_increment" json:"id"`
-	StrName    string `gorm:"column:stu_name;not null" json:"stu_name"  binding:"required"`
-	StrAge     uint8  `gorm:"column:stu_age;not null" json:"stu_age" binding:"required"`
-	StuSex     string `gorm:"column:stu_sex;not null" json:"stu_sex" binding:"required"`
-	StuAdderss string `gorm:"column:stu_address;not null" json:"stu_address" binding:"required"`
+	Id         uint64 `gorm:"primaryKey;autoIncrement" json:"id"`
+	StrName    string `gorm:"not null" json:"stu_name"`
+	StrAge     uint8  `gorm:"not null" json:"stu_age"`
+	StuSex     string `gorm:"not null" json:"stu_sex"`
+	StuAdderss string `gorm:"not null" json:"stu_address"`
 }
 
 func (s *StudentInfo) TableName() string {

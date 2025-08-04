@@ -12,8 +12,10 @@ package router
 */
 
 import (
+	"github.com/Lenoud/gin-demo/controller/login"
 	"github.com/Lenoud/gin-demo/controller/register"
 	"github.com/Lenoud/gin-demo/controller/student"
+	"github.com/Lenoud/gin-demo/middleware"
 	"github.com/gin-gonic/gin"
 )
 
@@ -34,20 +36,23 @@ func Load(g *gin.Engine) {
 	// 	MaxAge: 12 * time.Hour,
 	// }))
 
-	g.GET("/admin", func(c *gin.Context) {
-		c.String(200, "admin page!")
-	})
-	g.GET("/users", func(c *gin.Context) {
-		c.String(200, "user page!")
-	})
-	g.POST("/register", register.Register)
+	// g.GET("/admin", func(c *gin.Context) {
+	// 	c.String(200, "admin page!")
+	// })
+	// g.GET("/users", func(c *gin.Context) {
+	// 	c.String(200, "user page!")
+	// })
 
+	g.POST("/api/login", login.Login)
 	api := g.Group("/api")
+	api.Use(middleware.JWTAuthMiddleware())
 	{
 		api.GET("/students", student.GetStudents)        // 接口路径变为 /api/students
 		api.POST("/addstu", student.AddStudent)          // 接口路径变为 /api/addstu
 		api.DELETE("/delstu/:id", student.DelStudent)    // 接口路径变为 /api/delstu/:id
 		api.PUT("/updatestu/:id", student.UpdateStudent) // 接口路径变为 /api/updatestu/:id
-	}
 
+		api.POST("/register", register.Register)
+
+	}
 }

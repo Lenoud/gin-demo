@@ -5,6 +5,7 @@ import (
 	"github.com/spf13/viper"
 
 	"github.com/Lenoud/gin-demo/config"
+	"github.com/Lenoud/gin-demo/middleware"
 	"github.com/Lenoud/gin-demo/model"
 	"github.com/Lenoud/gin-demo/router"
 )
@@ -18,9 +19,14 @@ func main() {
 	}
 
 	//连接数据库
-	model.DB.Init()
-	model.DB.Self.LogMode(true)
+	model.DB = &model.Database{}
+	if err := model.DB.Init(); err != nil {
+		panic(err)
+	}
+
 	defer model.DB.Close()
+	//跨域中间件
+	g.Use(middleware.CORSMiddleware())
 	//加载路由
 	router.Load(g)
 
