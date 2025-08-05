@@ -14,6 +14,7 @@ package router
 import (
 	"github.com/Lenoud/gin-demo/controller/login"
 	"github.com/Lenoud/gin-demo/controller/register"
+	"github.com/Lenoud/gin-demo/controller/score"
 	"github.com/Lenoud/gin-demo/controller/student"
 	"github.com/Lenoud/gin-demo/middleware"
 	"github.com/gin-gonic/gin"
@@ -21,38 +22,31 @@ import (
 
 func Load(g *gin.Engine) {
 
-	// g.Use(cors.New(cors.Config{
-	// 	// 允许的前端来源（必须精确匹配你的前端地址）
-	// 	AllowOrigins: []string{"http://192.168.100.153:5173"},
-	// 	// 允许的请求方法
-	// 	AllowMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-	// 	// 允许的请求头
-	// 	AllowHeaders: []string{"Origin", "Content-Type", "Accept"},
-	// 	// 允许暴露的响应头
-	// 	ExposeHeaders: []string{"Content-Length"},
-	// 	// 是否允许携带凭证（如 cookies）
-	// 	AllowCredentials: true,
-	// 	// 预检请求的缓存时间（减少 OPTIONS 请求）
-	// 	MaxAge: 12 * time.Hour,
-	// }))
+	g.POST("/api/auth/login", login.Login)
 
-	// g.GET("/admin", func(c *gin.Context) {
-	// 	c.String(200, "admin page!")
-	// })
-	// g.GET("/users", func(c *gin.Context) {
-	// 	c.String(200, "user page!")
-	// })
-
-	g.POST("/api/login", login.Login)
 	api := g.Group("/api")
+	//启用jwt鉴权
 	api.Use(middleware.JWTAuthMiddleware())
 	{
-		api.GET("/students", student.GetStudents)        // 接口路径变为 /api/students
-		api.POST("/addstu", student.AddStudent)          // 接口路径变为 /api/addstu
-		api.DELETE("/delstu/:id", student.DelStudent)    // 接口路径变为 /api/delstu/:id
-		api.PUT("/updatestu/:id", student.UpdateStudent) // 接口路径变为 /api/updatestu/:id
+		//学生相关接口
+		api.GET("/students", student.GetStudents)
+		api.POST("/students", student.AddStudent)
+		api.DELETE("/students/:id", student.DelStudent)
+		api.PUT("/students/:id", student.UpdateStudent)
 
+		// 学生成绩相关
+		api.POST("/students/:id/scores", score.AddScore) // 添加成绩
+		api.GET("/students/:id/scores", score.GetScores) // 查询成绩
+		api.PUT("/scores/:score_id", score.UpdateScore)  // 修改成绩
+		api.DELETE("/scores/:score_id", score.DelScore)  // 删除成绩
+
+		// 用户注册
 		api.POST("/register", register.Register)
 
+		// 用户的管理
+		// api.GET("/users", register.Register)
+		// api.GET("/users/:id", register.Register)
+		// api.DELETE("/users/:id", register.Register)
+		// api.POST("/users/:id/students", register.Register)
 	}
 }
