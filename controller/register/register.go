@@ -14,7 +14,7 @@ func Register(c *gin.Context) {
 	}
 
 	// 强制普通注册用户不是管理员
-	user.IsAdmin = false
+	// user.IsAdmin = false
 
 	// 检查用户名是否存在
 	if model.DB.Self.Where("username = ?", user.Username).First(&model.UserJson{}).RowsAffected > 0 {
