@@ -3,10 +3,9 @@ package score
 import (
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/Lenoud/gin-demo/controller"
-	"github.com/Lenoud/gin-demo/model"
+	"github.com/Lenoud/gin-demo/service"
 	"github.com/gin-gonic/gin"
 )
 
@@ -28,18 +27,12 @@ func AddScore(c *gin.Context) {
 		return
 	}
 
-	score := model.Score{
-		StudentId:  studentID,
-		Subject:    req.Subject,
-		ScoreValue: req.ScoreValue,
-		CreatedAt:  time.Now(),
-		UpdatedAt:  time.Now(),
-	}
-
-	if err := model.DB.Self.Create(&score).Error; err != nil {
+	score, err := service.AddScore(studentID, req.Subject, req.ScoreValue)
+	if err != nil {
 		controller.SendResponse(c, http.StatusInternalServerError, "添加成绩失败", nil)
 		return
 	}
+
 	controller.SendResponse(c, http.StatusOK, "成绩添加成功", score)
 }
 
@@ -52,8 +45,8 @@ func GetScores(c *gin.Context) {
 		return
 	}
 
-	var scores []model.Score
-	if err := model.DB.Self.Where("student_id = ?", studentID).Find(&scores).Error; err != nil {
+	scores, err := service.GetScores(studentID)
+	if err != nil {
 		controller.SendResponse(c, http.StatusInternalServerError, "查询成绩失败", nil)
 		return
 	}
@@ -79,29 +72,13 @@ func UpdateScore(c *gin.Context) {
 		return
 	}
 
-	updateData := map[string]interface{}{
-		"updated_at": time.Now(),
-	}
-	if req.Subject != "" {
-		updateData["subject"] = req.Subject
-	}
-	if req.ScoreValue != 0 {
-		updateData["score_value"] = req.ScoreValue
-	}
-
-	if err := model.DB.Self.Model(&model.Score{}).Where("id = ?", scoreID).Updates(updateData).Error; err != nil {
+	score, err := service.UpdateScore(scoreID, req.Subject, req.ScoreValue)
+	if err != nil {
 		controller.SendResponse(c, http.StatusInternalServerError, "修改成绩失败", nil)
 		return
 	}
 
-	// 查询更新后的成绩信息并返回
-	var updatedScore model.Score
-	if err := model.DB.Self.First(&updatedScore, scoreID).Error; err != nil {
-		controller.SendResponse(c, http.StatusInternalServerError, "获取更新后成绩失败", nil)
-		return
-	}
-	
-	controller.SendResponse(c, http.StatusOK, "成绩修改成功", updatedScore)
+	controller.SendResponse(c, http.StatusOK, "成绩修改成功", score)
 }
 
 // DelScore 删除成绩
@@ -113,14 +90,7 @@ func DelScore(c *gin.Context) {
 		return
 	}
 
-	// 先查询是否存在
-	var score model.Score
-	if err := model.DB.Self.First(&score, scoreID).Error; err != nil {
-		controller.SendResponse(c, http.StatusNotFound, "成绩记录不存在", nil)
-		return
-	}
-
-	if err := model.DB.Self.Delete(&model.Score{}, scoreID).Error; err != nil {
+	if err := service.DeleteScore(scoreID); err != nil {
 		controller.SendResponse(c, http.StatusInternalServerError, "删除成绩失败", nil)
 		return
 	}

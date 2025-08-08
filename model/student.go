@@ -1,11 +1,9 @@
 package model
 
-import "errors"
-
 type StudentInfo struct {
 	Id         uint64 `gorm:"primaryKey;autoIncrement" json:"id"`
-	StrName    string `gorm:"not null" json:"stu_name"`
-	StrAge     uint8  `gorm:"not null" json:"stu_age"`
+	StuName    string `gorm:"not null" json:"stu_name"`
+	StuAge     uint8  `gorm:"not null" json:"stu_age"`
 	StuSex     string `gorm:"not null" json:"stu_sex"`
 	StuAdderss string `gorm:"not null" json:"stu_address"`
 }
@@ -20,18 +18,8 @@ func (s *StudentInfo) Create() error {
 
 // 在StudentInfo结构体中添加Delete方法
 func (s *StudentInfo) Delete() error {
-	result := DB.Self.Delete(s)
-	if result.Error != nil {
-		return result.Error
-	}
-	if result.RowsAffected == 0 {
-		return ErrRecordNotFound
-	}
-	return nil
+	return DB.Self.Delete(s).Error
 }
-
-// 在model包中定义未找到记录的错误
-var ErrRecordNotFound = errors.New("record not found")
 
 // 获取所有学生信息
 func (s *StudentInfo) GetAll() ([]StudentInfo, error) {

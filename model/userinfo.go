@@ -2,23 +2,37 @@ package model
 
 import (
 	"time"
+
+	"gorm.io/gorm"
 )
 
-// UserJson 结构体，存储用户信息
 type UserJson struct {
-	Id        uint64    `gorm:"column:id;primary_key;auto_increment" json:"id"`
-	Username  string    `gorm:"column:username;type:varchar(50);uniqueIndex;not null" json:"username" binding:"required,min=3,max=20"`
-	Password  string    `gorm:"column:password;type:varchar(255);not null" json:"password" binding:"required,min=6" json:"-"`
-	Email     string    `gorm:"column:email;type:varchar(100);uniqueIndex" json:"email" binding:"required,email"`
-	IsAdmin   bool      `gorm:"column:is_admin;default:false" json:"is_admin"`
-	CreatedAt time.Time `gorm:"column:created_at" json:"created_at"`
-	UpdatedAt time.Time `gorm:"column:updated_at" json:"updated_at"`
+	Id        uint64         `gorm:"primaryKey;autoIncrement" json:"id"`
+	Username  string         `gorm:"type:varchar(50);uniqueIndex;not null" json:"username" binding:"required,min=3,max=20"`
+	Password  string         `gorm:"type:varchar(255);not null" json:"password" binding:"required,min=6" json:"-"`
+	Email     string         `gorm:"type:varchar(100);uniqueIndex" json:"email" binding:"required,email"`
+	IsAdmin   bool           `gorm:"default:false" json:"is_admin"`
+	CreatedAt time.Time      `json:"created_at"`
+	UpdatedAt time.Time      `json:"updated_at"`
+	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
 }
 
-func (u *UserJson) TableName() string {
+func (UserJson) TableName() string {
 	return "user_info"
 }
 
-func (u *UserJson) Create() error {
-	return DB.Self.Create(&u).Error
+func CreateUser(user *UserJson) error {
+	return DB.Self.Create(user).Error
+}
+
+func GetUserByUsername(username string) (*UserJson, error) {
+	var user UserJson
+	err := DB.Self.Where("username = ?", username).First(&user).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &user, nil
 }
