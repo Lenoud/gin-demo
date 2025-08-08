@@ -16,6 +16,7 @@ import (
 	"github.com/Lenoud/gin-demo/controller/register"
 	"github.com/Lenoud/gin-demo/controller/score"
 	"github.com/Lenoud/gin-demo/controller/student"
+	"github.com/Lenoud/gin-demo/controller/user"
 	"github.com/Lenoud/gin-demo/middleware"
 	"github.com/gin-gonic/gin"
 )
@@ -44,9 +45,13 @@ func Load(g *gin.Engine) {
 		api.POST("/register", register.Register)
 
 		// 用户的管理
-		// api.GET("/users", register.Register)
+		api.GET("/users", user.ListUsers)
 		// api.GET("/users/:id", register.Register)
 		// api.DELETE("/users/:id", register.Register)
 		// api.POST("/users/:id/students", register.Register)
+		// 绑定用户和学生接口（需要鉴权）
+		api.POST("/user_students/bind", user.BindUserStudent)
+		api.DELETE("/user_students/bind/:user_id", user.UnbindUserStudent)
+
 	}
 }

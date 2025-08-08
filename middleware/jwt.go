@@ -6,6 +6,7 @@ import (
 
 	"github.com/Lenoud/gin-demo/utils"
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
 // JWTAuthMiddleware 验证 JWT 的中间件
@@ -14,6 +15,7 @@ func JWTAuthMiddleware() gin.HandlerFunc {
 		// 1. 获取 Authorization 头
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
+			zap.L().Warn("请求头缺少 Authorization")
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "请求头缺少 Authorization"})
 			c.Abort() // 阻止继续执行
 			return
@@ -22,6 +24,7 @@ func JWTAuthMiddleware() gin.HandlerFunc {
 		// 2. 必须是 "Bearer <token>" 格式
 		parts := strings.SplitN(authHeader, " ", 2)
 		if !(len(parts) == 2 && parts[0] == "Bearer") {
+			zap.L().Warn("Authorization 格式错误", zap.String("authHeader", authHeader))
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization 格式错误"})
 			c.Abort()
 			return
@@ -30,6 +33,7 @@ func JWTAuthMiddleware() gin.HandlerFunc {
 		// 3. 解析 token
 		claims, err := utils.ParseToken(parts[1])
 		if err != nil {
+			zap.L().Error("解析 Token 失败", zap.String("token", parts[1]), zap.String("error", err.Error()))
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "无效的 Token: " + err.Error()})
 			c.Abort()
 			return

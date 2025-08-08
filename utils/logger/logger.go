@@ -54,5 +54,14 @@ func InitLogger() {
 
 	Logger = zap.New(core, zap.AddCaller())
 	zap.ReplaceGlobals(Logger) // 让 zap.L() 使用默认 logger
+	zap.L().Info("Zap logger 初始化完成",
+		zap.String("logDir", viper.GetString("log.dir")),
+		zap.String("logFilename", viper.GetString("log.filename")),
+		zap.Int("maxSize", viper.GetInt("log.max.size")),
+		zap.Int("maxBackups", viper.GetInt("log.max.backups")),
+		zap.Int("maxAge", viper.GetInt("log.max.age")),
+		zap.Bool("compress", viper.GetBool("log.compress")),
+		zap.String("environment", env),
+	)
 	fmt.Println("Zap logger 初始化")
 }

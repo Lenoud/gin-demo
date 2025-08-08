@@ -36,3 +36,10 @@ func GetUserByUsername(username string) (*UserJson, error) {
 	}
 	return &user, nil
 }
+
+// 新增：列出所有用户
+func ListUsers() ([]UserJson, error) {
+	var users []UserJson
+	err := DB.Self.Find(&users).Error
+	return users, err
+}

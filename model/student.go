@@ -5,7 +5,7 @@ type StudentInfo struct {
 	StuName    string `gorm:"not null" json:"stu_name"`
 	StuAge     uint8  `gorm:"not null" json:"stu_age"`
 	StuSex     string `gorm:"not null" json:"stu_sex"`
-	StuAdderss string `gorm:"not null" json:"stu_address"`
+	StuAddress  string `gorm:"not null" json:"stu_address"`
 }
 
 func (s *StudentInfo) TableName() string {

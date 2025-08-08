@@ -4,7 +4,8 @@
 server:
   port: 38080
   ip: 0.0.0.0
-
+jwt:
+  secret: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"
 
 database:
   host: localhost
