@@ -1,6 +1,12 @@
+# config/config.yaml
+# 使用多层级配置
+# ！！ 开启了环境变量覆盖机制 SERVER_IP=127.0.0.1 可以覆盖掉server.ip 的值
 server:
-  port: :38080
-  ipaddr: 0.0.0.0
+  port: 38080
+  ip: 0.0.0.0
+jwt:
+  secret: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"
+
 database:
   host: localhost
   port: 3306
@@ -8,3 +14,14 @@ database:
   password: 123456
   db: gin_web
 
+
+log:
+  dir: "logs"       # 日志目录
+  filename: "app.log"  # 日志文件名
+  compress: true
+  level: "info"
+  console: true
+  max:
+    size: 10      # 单个文件最大尺寸
+    backups: 5    # 最大备份数
+    age: 7        # 保留天数

@@ -3,19 +3,21 @@ package score
 import (
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/Lenoud/gin-demo/controller"
-	"github.com/Lenoud/gin-demo/model"
+	"github.com/Lenoud/gin-demo/service"
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
 // AddScore 给某个学生添加成绩
 func AddScore(c *gin.Context) {
+	zap.L().Info("收到添加成绩请求", zap.String("studentId", c.Param("id")))
 	studentIDStr := c.Param("id")
 	studentID, err := strconv.ParseUint(studentIDStr, 10, 64)
 	if err != nil {
 		controller.SendResponse(c, http.StatusBadRequest, "学生ID格式错误", nil)
+		zap.L().Warn("学生ID格式错误", zap.String("studentId", studentIDStr), zap.String("error", err.Error()))
 		return
 	}
 
@@ -25,48 +27,51 @@ func AddScore(c *gin.Context) {
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		controller.SendResponse(c, http.StatusBadRequest, "请求参数错误", nil)
+		zap.L().Warn("请求参数错误", zap.String("error", err.Error()))
 		return
 	}
 
-	score := model.Score{
-		StudentId:  studentID,
-		Subject:    req.Subject,
-		ScoreValue: req.ScoreValue,
-		CreatedAt:  time.Now(),
-		UpdatedAt:  time.Now(),
-	}
-
-	if err := model.DB.Self.Create(&score).Error; err != nil {
+	score, err := service.AddScore(studentID, req.Subject, req.ScoreValue)
+	if err != nil {
 		controller.SendResponse(c, http.StatusInternalServerError, "添加成绩失败", nil)
+		zap.L().Error("添加成绩失败", zap.Uint64("studentId", studentID), zap.String("error", err.Error()))
 		return
 	}
+
 	controller.SendResponse(c, http.StatusOK, "成绩添加成功", score)
+	zap.L().Info("成绩添加成功", zap.Uint64("studentId", studentID), zap.String("subject", req.Subject), zap.Float64("scoreValue", req.ScoreValue))
 }
 
 // GetScores 查询某个学生的成绩
 func GetScores(c *gin.Context) {
+	zap.L().Info("收到获取成绩请求", zap.String("studentId", c.Param("id")))
 	studentIDStr := c.Param("id")
 	studentID, err := strconv.ParseUint(studentIDStr, 10, 64)
 	if err != nil {
 		controller.SendResponse(c, http.StatusBadRequest, "学生ID格式错误", nil)
+		zap.L().Warn("学生ID格式错误", zap.String("studentId", studentIDStr), zap.String("error", err.Error()))
 		return
 	}
 
-	var scores []model.Score
-	if err := model.DB.Self.Where("student_id = ?", studentID).Find(&scores).Error; err != nil {
+	scores, err := service.GetScores(studentID)
+	if err != nil {
 		controller.SendResponse(c, http.StatusInternalServerError, "查询成绩失败", nil)
+		zap.L().Error("查询成绩失败", zap.Uint64("studentId", studentID), zap.String("error", err.Error()))
 		return
 	}
 
 	controller.SendResponse(c, http.StatusOK, "查询成功", scores)
+	zap.L().Info("成绩查询成功", zap.Uint64("studentId", studentID), zap.Int("scoreCount", len(scores)))
 }
 
 // UpdateScore 修改成绩
 func UpdateScore(c *gin.Context) {
+	zap.L().Info("收到更新成绩请求", zap.String("scoreId", c.Param("score_id")))
 	scoreIDStr := c.Param("score_id")
 	scoreID, err := strconv.ParseUint(scoreIDStr, 10, 64)
 	if err != nil {
 		controller.SendResponse(c, http.StatusBadRequest, "成绩ID格式错误", nil)
+		zap.L().Warn("成绩ID格式错误", zap.String("scoreId", scoreIDStr), zap.String("error", err.Error()))
 		return
 	}
 
@@ -76,54 +81,38 @@ func UpdateScore(c *gin.Context) {
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		controller.SendResponse(c, http.StatusBadRequest, "请求参数错误", nil)
+		zap.L().Warn("请求参数错误", zap.String("error", err.Error()))
 		return
 	}
 
-	updateData := map[string]interface{}{
-		"updated_at": time.Now(),
-	}
-	if req.Subject != "" {
-		updateData["subject"] = req.Subject
-	}
-	if req.ScoreValue != 0 {
-		updateData["score_value"] = req.ScoreValue
-	}
-
-	if err := model.DB.Self.Model(&model.Score{}).Where("id = ?", scoreID).Updates(updateData).Error; err != nil {
+	score, err := service.UpdateScore(scoreID, req.Subject, req.ScoreValue)
+	if err != nil {
 		controller.SendResponse(c, http.StatusInternalServerError, "修改成绩失败", nil)
+		zap.L().Error("修改成绩失败", zap.Uint64("scoreId", scoreID), zap.String("error", err.Error()))
 		return
 	}
 
-	// 查询更新后的成绩信息并返回
-	var updatedScore model.Score
-	if err := model.DB.Self.First(&updatedScore, scoreID).Error; err != nil {
-		controller.SendResponse(c, http.StatusInternalServerError, "获取更新后成绩失败", nil)
-		return
-	}
-	
-	controller.SendResponse(c, http.StatusOK, "成绩修改成功", updatedScore)
+	controller.SendResponse(c, http.StatusOK, "成绩修改成功", score)
+	zap.L().Info("成绩更新成功", zap.Uint64("scoreId", scoreID), zap.String("subject", req.Subject), zap.Float64("scoreValue", req.ScoreValue))
 }
 
 // DelScore 删除成绩
 func DelScore(c *gin.Context) {
+	zap.L().Info("收到删除成绩请求", zap.String("scoreId", c.Param("score_id")))
 	scoreIDStr := c.Param("score_id")
 	scoreID, err := strconv.ParseUint(scoreIDStr, 10, 64)
 	if err != nil {
 		controller.SendResponse(c, http.StatusBadRequest, "成绩ID格式错误", nil)
+		zap.L().Warn("成绩ID格式错误", zap.String("scoreId", scoreIDStr), zap.String("error", err.Error()))
 		return
 	}
 
-	// 先查询是否存在
-	var score model.Score
-	if err := model.DB.Self.First(&score, scoreID).Error; err != nil {
-		controller.SendResponse(c, http.StatusNotFound, "成绩记录不存在", nil)
-		return
-	}
-
-	if err := model.DB.Self.Delete(&model.Score{}, scoreID).Error; err != nil {
+	if err := service.DeleteScore(scoreID); err != nil {
 		controller.SendResponse(c, http.StatusInternalServerError, "删除成绩失败", nil)
+		zap.L().Error("删除成绩失败", zap.Uint64("scoreId", scoreID), zap.String("error", err.Error()))
 		return
 	}
 
 	controller.SendResponse(c, http.StatusOK, "成绩删除成功", scoreID)
+	zap.L().Info("成绩删除成功", zap.Uint64("scoreId", scoreID))
 }

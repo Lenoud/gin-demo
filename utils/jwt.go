@@ -5,9 +5,10 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/spf13/viper"
 )
 
-var jwtSecret = []byte("your-secret-key") // 生产环境请放到配置文件
+var jwtSecret = []byte(viper.GetString("jwt.secret")) // 生产环境请放到配置文件
 
 // 生成 Token
 func GenerateToken(userID uint64, isAdmin bool) (string, error) {
