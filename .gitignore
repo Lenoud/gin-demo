@@ -1,8 +1,9 @@
+# Build output
+/bin/
+
 # Logs
 logs
 *.log
-
-
 
 # Editor directories and files
 .vscode/*
