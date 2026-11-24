@@ -29,8 +29,8 @@ gin-demo/
 │   ├── service/            # 业务逻辑
 │   └── utils/              # JWT 工具与日志初始化
 ├── examples/
-│   └── basic/
-│       └── main.go         # 独立的 Gin 入门示例
+│   ├── basic/              # 独立的 Gin 入门示例
+│   └── webform/            # 登录与注册表单示例
 ├── bin/                    # 本地构建产物，已忽略
 ├── logs/                   # 运行时日志，已忽略
 ├── .gitignore
@@ -91,6 +91,11 @@ go run ./examples/basic
 ```
 
 示例监听 `:38080`，访问 `http://127.0.0.1:38080/ping` 可获得 `online` 响应。
+
+### 运行网页表单示例
+
+在项目根目录运行 `go run ./examples/webform`，然后访问 `http://127.0.0.1:38081`。
+示例演示注册表单和登录校验。账号只在进程内保存，重启后需要重新注册。
 
 ## 核心模块说明
 
